@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./db');
+const mongoose = require('mongoose');
 require('dotenv').config();
 
 const path = require('path');
@@ -26,7 +27,18 @@ app.use('/api/contact', require('./routes/contactRoutes'));
 
 // Basic Route
 app.get('/', (req, res) => {
-    res.send('API is running and MongoDB is connected!');
+    const dbState = mongoose.connection.readyState;
+    const states = {
+        0: 'Disconnected',
+        1: 'Connected',
+        2: 'Connecting',
+        3: 'Disconnecting'
+    };
+    res.json({
+        api: 'running',
+        mongoUriDefined: !!process.env.MONGO_URI,
+        databaseState: states[dbState] || 'Unknown'
+    });
 });
 
 const PORT = process.env.PORT || 5000;
