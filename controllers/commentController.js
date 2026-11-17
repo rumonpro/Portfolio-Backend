@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Comment = require('../models/Comment');
 const { isDbConnected, readData, writeData } = require('../utils/storage');
 
@@ -12,21 +13,25 @@ const addComment = async (req, res) => {
             return res.status(400).json({ message: 'Please fill all required fields' });
         }
 
-        if (isDbConnected()) {
-            const comment = await Comment.create({
-                blogId,
-                name,
-                email,
-                message,
-                website
-            });
-            return res.status(201).json(comment);
+        if (isDbConnected() && mongoose.isValidObjectId(blogId)) {
+            try {
+                const comment = await Comment.create({
+                    blogId,
+                    name,
+                    email,
+                    message,
+                    website
+                });
+                return res.status(201).json(comment);
+            } catch (e) {
+                console.warn('DB comment create error, falling back to local file:', e.message);
+            }
         }
 
         const comments = readData('comments');
         const newComment = {
             _id: Date.now().toString(),
-            blogId,
+            blogId: String(blogId),
             name,
             email,
             message,
@@ -48,13 +53,18 @@ const addComment = async (req, res) => {
 // @access  Public
 const getCommentsByBlogId = async (req, res) => {
     try {
-        if (isDbConnected()) {
-            const comments = await Comment.find({ blogId: req.params.blogId }).sort({ createdAt: -1 });
-            return res.status(200).json(comments);
+        const blogId = req.params.blogId;
+        if (isDbConnected() && mongoose.isValidObjectId(blogId)) {
+            try {
+                const comments = await Comment.find({ blogId }).sort({ createdAt: -1 });
+                if (comments && comments.length > 0) return res.status(200).json(comments);
+            } catch (e) {
+                console.warn('DB comments lookup error, falling back to local file:', e.message);
+            }
         }
 
         const comments = readData('comments')
-            .filter(c => c.blogId === req.params.blogId)
+            .filter(c => String(c.blogId) === String(blogId))
             .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         res.status(200).json(comments);
     } catch (error) {
@@ -64,12 +74,16 @@ const getCommentsByBlogId = async (req, res) => {
 
 // @desc    Get all comments (Admin)
 // @route   GET /api/comments
-// @access  Public (Should be private in production)
+// @access  Public
 const getAllComments = async (req, res) => {
     try {
         if (isDbConnected()) {
-            const comments = await Comment.find().populate('blogId', 'title').sort({ createdAt: -1 });
-            return res.status(200).json(comments);
+            try {
+                const comments = await Comment.find().populate('blogId', 'title').sort({ createdAt: -1 });
+                if (comments && comments.length > 0) return res.status(200).json(comments);
+            } catch (e) {
+                console.warn('DB comments error:', e.message);
+            }
         }
 
         const comments = readData('comments').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -81,33 +95,28 @@ const getAllComments = async (req, res) => {
 
 // @desc    Update a comment (Reply)
 // @route   PUT /api/comments/:id
-// @access  Public (Should be private in production)
+// @access  Public
 const updateComment = async (req, res) => {
     try {
         const { reply } = req.body;
-        if (isDbConnected()) {
+        const id = req.params.id;
+
+        if (isDbConnected() && mongoose.isValidObjectId(id)) {
             const comment = await Comment.findByIdAndUpdate(
-                req.params.id,
+                id,
                 { reply },
                 { new: true }
             );
-            if (!comment) {
-                return res.status(404).json({ message: 'Comment not found' });
-            }
-            return res.status(200).json(comment);
+            if (comment) return res.status(200).json(comment);
         }
 
         let comments = readData('comments');
-        const index = comments.findIndex(c => c._id === req.params.id);
+        const index = comments.findIndex(c => String(c._id) === String(id));
         if (index === -1) {
             return res.status(404).json({ message: 'Comment not found' });
         }
 
-        comments[index] = {
-            ...comments[index],
-            reply: reply,
-            updatedAt: new Date().toISOString()
-        };
+        comments[index].reply = reply;
         writeData('comments', comments);
         res.status(200).json(comments[index]);
     } catch (error) {
@@ -117,25 +126,24 @@ const updateComment = async (req, res) => {
 
 // @desc    Delete a comment
 // @route   DELETE /api/comments/:id
-// @access  Public (Should be private in production)
+// @access  Public
 const deleteComment = async (req, res) => {
     try {
-        if (isDbConnected()) {
-            const comment = await Comment.findByIdAndDelete(req.params.id);
-            if (!comment) {
-                return res.status(404).json({ message: 'Comment not found' });
-            }
-            return res.status(200).json({ message: 'Comment deleted' });
+        const id = req.params.id;
+        if (isDbConnected() && mongoose.isValidObjectId(id)) {
+            await Comment.findByIdAndDelete(id);
+            return res.status(200).json({ message: 'Comment deleted successfully' });
         }
 
         let comments = readData('comments');
         const initialLength = comments.length;
-        comments = comments.filter(c => c._id !== req.params.id);
+        comments = comments.filter(c => String(c._id) !== String(id));
         if (comments.length === initialLength) {
             return res.status(404).json({ message: 'Comment not found' });
         }
+
         writeData('comments', comments);
-        res.status(200).json({ message: 'Comment deleted' });
+        res.status(200).json({ message: 'Comment deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

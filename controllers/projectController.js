@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Project = require('../models/Project');
 const { isDbConnected, readData, writeData } = require('../utils/storage');
 
@@ -5,10 +6,31 @@ exports.getProjects = async (req, res) => {
     try {
         if (isDbConnected()) {
             const projects = await Project.find().sort({ createdAt: -1 });
-            return res.json(projects);
+            if (projects && projects.length > 0) return res.json(projects);
         }
         const projects = readData('projects').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         res.json(projects);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+exports.getProjectById = async (req, res) => {
+    try {
+        const id = req.params.id;
+        if (isDbConnected()) {
+            if (mongoose.isValidObjectId(id)) {
+                const project = await Project.findById(id);
+                if (project) return res.json(project);
+            }
+            const project = await Project.findOne({ _id: id });
+            if (project) return res.json(project);
+        }
+
+        const projects = readData('projects');
+        const project = projects.find(p => String(p._id) === String(id));
+        if (!project) return res.status(404).json({ message: 'Project not found' });
+        res.json(project);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -45,57 +67,20 @@ exports.createProject = async (req, res) => {
     }
 };
 
-exports.deleteProject = async (req, res) => {
-    try {
-        if (isDbConnected()) {
-            await Project.findByIdAndDelete(req.params.id);
-            return res.json({ message: 'Project deleted' });
-        }
-
-        let projects = readData('projects');
-        const initialLength = projects.length;
-        projects = projects.filter(p => p._id !== req.params.id);
-        if (projects.length === initialLength) {
-            return res.status(404).json({ message: 'Project not found' });
-        }
-        writeData('projects', projects);
-        res.json({ message: 'Project deleted' });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-};
-
-exports.getProjectById = async (req, res) => {
-    try {
-        if (isDbConnected()) {
-            const project = await Project.findById(req.params.id);
-            if (!project) return res.status(404).json({ message: 'Project not found' });
-            return res.json(project);
-        }
-
-        const projects = readData('projects');
-        const project = projects.find(p => p._id === req.params.id);
-        if (!project) return res.status(404).json({ message: 'Project not found' });
-        res.json(project);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-};
-
 exports.updateProject = async (req, res) => {
     try {
-        if (isDbConnected()) {
+        const id = req.params.id;
+        if (isDbConnected() && mongoose.isValidObjectId(id)) {
             const updatedProject = await Project.findByIdAndUpdate(
-                req.params.id,
+                id,
                 { $set: req.body },
                 { new: true, runValidators: true }
             );
-            if (!updatedProject) return res.status(404).json({ message: 'Project not found' });
-            return res.json(updatedProject);
+            if (updatedProject) return res.json(updatedProject);
         }
 
         let projects = readData('projects');
-        const index = projects.findIndex(p => p._id === req.params.id);
+        const index = projects.findIndex(p => String(p._id) === String(id));
         if (index === -1) return res.status(404).json({ message: 'Project not found' });
 
         const updated = {
@@ -108,5 +93,26 @@ exports.updateProject = async (req, res) => {
         res.json(updated);
     } catch (err) {
         res.status(400).json({ message: err.message });
+    }
+};
+
+exports.deleteProject = async (req, res) => {
+    try {
+        const id = req.params.id;
+        if (isDbConnected() && mongoose.isValidObjectId(id)) {
+            await Project.findByIdAndDelete(id);
+            return res.json({ message: 'Project deleted' });
+        }
+
+        let projects = readData('projects');
+        const initialLength = projects.length;
+        projects = projects.filter(p => String(p._id) !== String(id));
+        if (projects.length === initialLength) {
+            return res.status(404).json({ message: 'Project not found' });
+        }
+        writeData('projects', projects);
+        res.json({ message: 'Project deleted' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 };

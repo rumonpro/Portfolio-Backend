@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Blog = require('../models/Blog');
 const { isDbConnected, readData, writeData } = require('../utils/storage');
 
@@ -5,7 +6,7 @@ exports.getBlogs = async (req, res) => {
     try {
         if (isDbConnected()) {
             const blogs = await Blog.find({ published: true }).sort({ createdAt: -1 });
-            return res.json(blogs);
+            if (blogs && blogs.length > 0) return res.json(blogs);
         }
         const blogs = readData('blogs')
             .filter(b => b.published !== false)
@@ -20,7 +21,7 @@ exports.getAllBlogs = async (req, res) => {
     try {
         if (isDbConnected()) {
             const blogs = await Blog.find().sort({ createdAt: -1 });
-            return res.json(blogs);
+            if (blogs && blogs.length > 0) return res.json(blogs);
         }
         const blogs = readData('blogs').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         res.json(blogs);
@@ -31,16 +32,18 @@ exports.getAllBlogs = async (req, res) => {
 
 exports.getBlogById = async (req, res) => {
     try {
+        const id = req.params.id;
         if (isDbConnected()) {
-            const blog = await Blog.findById(req.params.id);
-            if (!blog) {
-                return res.status(404).json({ message: 'Blog not found' });
+            if (mongoose.isValidObjectId(id)) {
+                const blog = await Blog.findById(id);
+                if (blog) return res.json(blog);
             }
-            return res.json(blog);
+            const blog = await Blog.findOne({ _id: id });
+            if (blog) return res.json(blog);
         }
 
         const blogs = readData('blogs');
-        const blog = blogs.find(b => b._id === req.params.id);
+        const blog = blogs.find(b => String(b._id) === String(id));
         if (!blog) {
             return res.status(404).json({ message: 'Blog not found' });
         }
@@ -82,16 +85,14 @@ exports.createBlog = async (req, res) => {
 
 exports.updateBlog = async (req, res) => {
     try {
-        if (isDbConnected()) {
-            const blog = await Blog.findByIdAndUpdate(req.params.id, req.body, { new: true });
-            if (!blog) {
-                return res.status(404).json({ message: 'Blog not found' });
-            }
-            return res.json(blog);
+        const id = req.params.id;
+        if (isDbConnected() && mongoose.isValidObjectId(id)) {
+            const blog = await Blog.findByIdAndUpdate(id, req.body, { new: true });
+            if (blog) return res.json(blog);
         }
 
         let blogs = readData('blogs');
-        const index = blogs.findIndex(b => b._id === req.params.id);
+        const index = blogs.findIndex(b => String(b._id) === String(id));
         if (index === -1) {
             return res.status(404).json({ message: 'Blog not found' });
         }
@@ -111,14 +112,15 @@ exports.updateBlog = async (req, res) => {
 
 exports.deleteBlog = async (req, res) => {
     try {
-        if (isDbConnected()) {
-            await Blog.findByIdAndDelete(req.params.id);
+        const id = req.params.id;
+        if (isDbConnected() && mongoose.isValidObjectId(id)) {
+            await Blog.findByIdAndDelete(id);
             return res.json({ message: 'Blog deleted' });
         }
 
         let blogs = readData('blogs');
         const initialLength = blogs.length;
-        blogs = blogs.filter(b => b._id !== req.params.id);
+        blogs = blogs.filter(b => String(b._id) !== String(id));
         if (blogs.length === initialLength) {
             return res.status(404).json({ message: 'Blog not found' });
         }
