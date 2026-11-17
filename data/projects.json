@@ -1,0 +1,137 @@
+[
+  {
+    "_id": "proj_101",
+    "name": "CyberGuard - Enterprise Vulnerability Scanner",
+    "description": "An automated web security auditing and penetration testing platform designed to scan web applications for OWASP Top 10 vulnerabilities, SSL misconfigurations, header leaks, and open ports.",
+    "techStack": [
+      "Python",
+      "OWASP ZAP",
+      "Bash",
+      "Docker",
+      "Security"
+    ],
+    "liveLink": "https://github.com/rumonpro",
+    "githubLink": "https://github.com/rumonpro",
+    "image": "Assets/1.jpg",
+    "category": "Cyber Security",
+    "createdAt": "2026-11-14T10:00:00.000Z"
+  },
+  {
+    "_id": "proj_102",
+    "name": "Qnifly Digital - Corporate Agency Platform",
+    "description": "Full-scale modern corporate website for a high-impact digital solutions agency, featuring custom dynamic service modules, responsive interactive UI, and 98+ PageSpeed optimization.",
+    "techStack": [
+      "WordPress",
+      "Elementor Pro",
+      "PHP",
+      "JavaScript",
+      "CSS3"
+    ],
+    "liveLink": "https://github.com/rumonpro",
+    "githubLink": "https://github.com/rumonpro",
+    "image": "Assets/2.jpg",
+    "category": "Web Development",
+    "createdAt": "2026-11-13T10:00:00.000Z"
+  },
+  {
+    "_id": "proj_103",
+    "name": "SecureVault - Zero-Knowledge Cloud Storage",
+    "description": "End-to-end encrypted personal cloud storage application featuring client-side AES-256-GCM encryption, granular file sharing permissions, and cryptographic integrity verification.",
+    "techStack": [
+      "React",
+      "Node.js",
+      "Express",
+      "MongoDB",
+      "AES-256"
+    ],
+    "liveLink": "https://github.com/rumonpro",
+    "githubLink": "https://github.com/rumonpro",
+    "image": "Assets/3.jpg",
+    "category": "Full Stack",
+    "createdAt": "2026-11-12T10:00:00.000Z"
+  },
+  {
+    "_id": "proj_104",
+    "name": "Luxora Store - High-Performance eCommerce",
+    "description": "Ultra-fast online shopping experience featuring custom product customizers, Stripe multi-currency checkout, automated cart recovery, and lightning 1.1s load time.",
+    "techStack": [
+      "WooCommerce",
+      "WordPress",
+      "Stripe API",
+      "Tailwind CSS"
+    ],
+    "liveLink": "https://github.com/rumonpro",
+    "githubLink": "https://github.com/rumonpro",
+    "image": "Assets/4.jpg",
+    "category": "CMS & E-Commerce",
+    "createdAt": "2026-11-11T10:00:00.000Z"
+  },
+  {
+    "_id": "proj_105",
+    "name": "Sentinel Shield - Real-Time Web Application Firewall",
+    "description": "High-throughput reverse proxy inspection engine that detects SQL Injection, Cross-Site Scripting (XSS), and Layer 7 DDoS threats with sub-millisecond overhead and real-time blocking.",
+    "techStack": [
+      "Node.js",
+      "Express",
+      "Redis",
+      "Cloudflare API",
+      "Security"
+    ],
+    "liveLink": "https://github.com/rumonpro",
+    "githubLink": "https://github.com/rumonpro",
+    "image": "Assets/5.jpg",
+    "category": "Cyber Security",
+    "createdAt": "2026-11-10T10:00:00.000Z"
+  },
+  {
+    "_id": "proj_106",
+    "name": "DevFolio Pro - Interactive Portfolio & CMS",
+    "description": "State-of-the-art dark theme developer portfolio powered by GPU-accelerated canvas particles, dynamic REST API CMS, JWT authentication, and interactive visitor analytics.",
+    "techStack": [
+      "HTML5",
+      "CSS3",
+      "JavaScript",
+      "Node.js",
+      "Express"
+    ],
+    "liveLink": "https://portfolio-frontend-one-theta-46.vercel.app/Index.html",
+    "githubLink": "https://github.com/rumonpro/Portfolio-Frontend",
+    "image": "Assets/6.jpg",
+    "category": "Full Stack",
+    "createdAt": "2026-11-09T10:00:00.000Z"
+  },
+  {
+    "_id": "proj_107",
+    "name": "Apex Fitness - Subscription & Booking Portal",
+    "description": "Modern fitness club management web app featuring automated class scheduling, membership recurring billing via Stripe, SMS alerts, and personalized trainer dashboard.",
+    "techStack": [
+      "React",
+      "Node.js",
+      "MongoDB",
+      "Stripe",
+      "Tailwind"
+    ],
+    "liveLink": "https://github.com/rumonpro",
+    "githubLink": "https://github.com/rumonpro",
+    "image": "Assets/7.jpg",
+    "category": "Web Development",
+    "createdAt": "2026-11-08T10:00:00.000Z"
+  },
+  {
+    "_id": "proj_108",
+    "name": "PassKey Auth - Biometric & FIDO2 Identity Provider",
+    "description": "Passwordless authentication service implementing WebAuthn Passkeys, TOTP two-factor authentication, device fingerprinting, and automatic brute-force IP rate limiting.",
+    "techStack": [
+      "TypeScript",
+      "Express",
+      "WebAuthn",
+      "JWT",
+      "MongoDB"
+    ],
+    "liveLink": "https://github.com/rumonpro",
+    "githubLink": "https://github.com/rumonpro",
+    "image": "Assets/8.jpg",
+    "category": "Cyber Security",
+    "createdAt": "2026-11-07T10:00:00.000Z"
+  }
+]
